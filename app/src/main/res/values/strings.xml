@@ -7,4 +7,6 @@
     <string name="erro_ao_deletar_o_item">Erro ao deletar o item</string>
     <string name="nao_foi_possivel_obter_a_localizacao">Não foi possível obter a localização</string>
     <string name="permiss_o_de_localizacao_negada">Permissão de localização negada</string>
+    <string name="erro_ao_buscar_os_itens">Erro ao buscar os itens</string>
+    <string name="nenhum_item_encontrado">Nenhum item encontrado</string>
 </resources>
