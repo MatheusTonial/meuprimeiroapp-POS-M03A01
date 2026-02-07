@@ -13,7 +13,7 @@ interface ItemApiService {
     @GET("items/{id}")
     suspend fun getItem(@Path("id") id: String): Item
 
-    @DELETE
+    @DELETE("items/{id}")
     suspend fun deleteItem(@Path("id") id: String)
 }
 
