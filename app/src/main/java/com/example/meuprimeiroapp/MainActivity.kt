@@ -64,7 +64,8 @@ class MainActivity : AppCompatActivity() {
                 getLastLocation()
             }
             else{
-                Toast.makeText(this, "Permissão de localização negada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,
+                    R.string.permiss_o_de_localizacao_negada, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -104,7 +105,8 @@ class MainActivity : AppCompatActivity() {
                 val longitude = location.longitude
             }
             else{
-                Toast.makeText(this, "Não foi possível obter a localização", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,
+                    R.string.nao_foi_possivel_obter_a_localizacao, Toast.LENGTH_SHORT).show()
             }
         }
     }

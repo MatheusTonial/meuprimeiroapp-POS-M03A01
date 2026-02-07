@@ -61,6 +61,9 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.deleteCTA.setOnClickListener {
             deleteItem()
         }
+        binding.editCTA.setOnClickListener {
+            editItem()
+        }
     }
 
     private fun loadItem() {
@@ -117,15 +120,42 @@ class ItemDetailActivity : AppCompatActivity(), OnMapReadyCallback {
                 when(result){
                     is Result.Success -> handleSuccessDelete()
                     is Result.Error -> {
-                        Toast.makeText(this@ItemDetailActivity, "Erro ao deletar o item", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ItemDetailActivity,
+                            R.string.erro_ao_deletar_o_item, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
     }
 
+    private fun editItem(){
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = safeApiCall {
+                RetrofitClient.apiService.updateItem(
+                item.id,
+                item.value.copy(profession = binding.profession.text.toString())
+                )
+            }
+
+            withContext(Dispatchers.Main){
+                when(result){
+                    is Result.Success<*> -> {
+                        Toast.makeText(this@ItemDetailActivity,
+                            R.string.item_editado_com_sucesso, Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    is Result.Error -> {
+                        Toast.makeText(this@ItemDetailActivity,
+                            R.string.erro_ao_editar_o_item, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+
     private fun handleSuccessDelete() {
-        Toast.makeText(this, "Item deletado com sucesso", Toast.LENGTH_SHORT)
+        Toast.makeText(this, R.string.item_deletado_com_sucesso, Toast.LENGTH_SHORT)
             .show()
         finish()
     }

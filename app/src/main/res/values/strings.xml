@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">MeuPrimeiroApp</string>
     <string name="item_age">%1$d anos</string>
+    <string name="item_editado_com_sucesso">Item editado com sucesso</string>
+    <string name="erro_ao_editar_o_item">Erro ao editar o item</string>
+    <string name="item_deletado_com_sucesso">Item deletado com sucesso</string>
+    <string name="erro_ao_deletar_o_item">Erro ao deletar o item</string>
+    <string name="nao_foi_possivel_obter_a_localizacao">Não foi possível obter a localização</string>
+    <string name="permiss_o_de_localizacao_negada">Permissão de localização negada</string>
 </resources>
