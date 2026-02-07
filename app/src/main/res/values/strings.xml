@@ -9,4 +9,8 @@
     <string name="permiss_o_de_localizacao_negada">Permissão de localização negada</string>
     <string name="erro_ao_buscar_os_itens">Erro ao buscar os itens</string>
     <string name="nenhum_item_encontrado">Nenhum item encontrado</string>
+    <string name="campo_obrigatorio">Campo obrigatório</string>
+    <string name="erro_add_item">Erro ao adicionar o item</string>
+    <string name="sucesso_add_item">Item adicionado com sucesso</string>
+    <string name="permissao_de_localizacao_negada">Permissao de localizaçã negada</string>
 </resources>
