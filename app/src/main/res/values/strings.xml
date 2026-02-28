@@ -13,4 +13,10 @@
     <string name="erro_add_item">Erro ao adicionar o item</string>
     <string name="sucesso_add_item">Item adicionado com sucesso</string>
     <string name="permissao_de_localizacao_negada">Permissao de localizaçã negada</string>
+    <string name="hint_cellphone">+55 11 1231315422</string>
+    <string name="code_brazil">+55</string>
+    <string name="send_sms">Enviar SMS</string>
+    <string name="hint_verify_sms">123456</string>
+    <string name="verify_sms">Verificar SMS</string>
+    <string name="menu_logout">Sair</string>
 </resources>

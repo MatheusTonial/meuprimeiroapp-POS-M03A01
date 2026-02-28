@@ -1,9 +1,13 @@
 package com.example.meuprimeiroapp
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -12,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.meuprimeiroapp.adapter.ItemAdapter
+import com.example.meuprimeiroapp.database.DatabaseBuilder
+import com.example.meuprimeiroapp.database.model.UserLocation
 import com.example.meuprimeiroapp.databinding.ActivityMainBinding
 import com.example.meuprimeiroapp.model.Item
 import com.example.meuprimeiroapp.service.Result
@@ -20,6 +26,7 @@ import com.example.meuprimeiroapp.service.safeApiCall
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +50,28 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         fetchItems()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_loggout -> {
+                onLoggout()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun onLoggout() {
+        FirebaseAuth.getInstance().signOut()
+        val intent = LoginActivity.newIntent(this)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 
     private fun setupView() {
@@ -111,6 +140,15 @@ class MainActivity : AppCompatActivity() {
                 val location = task.result
                 val latitude = location.latitude
                 val longitude = location.longitude
+                CoroutineScope(Dispatchers.IO).launch {
+                    val userLocation = UserLocation(
+                        latitude = latitude,
+                        longitude = longitude
+                    )
+                    DatabaseBuilder.getInstance()
+                        .userLocationDao()
+                        .insert(userLocation)
+                }
             }
             else{
                 Toast.makeText(this,
@@ -152,5 +190,20 @@ class MainActivity : AppCompatActivity() {
         binding.message.visibility = View.GONE
         binding.message.setText(R.string.erro_ao_buscar_os_itens)
         binding.recyclerView.visibility = View.GONE
+    }
+
+    companion object {
+        fun newIntent(context: Context): Intent {
+            return Intent(context, MainActivity::class.java)
+        }
+    }
+
+    private fun onLogout(){
+        FirebaseAuth.getInstance().signOut()
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+
+        finish()
     }
 }
