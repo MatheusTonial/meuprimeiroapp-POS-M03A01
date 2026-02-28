@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Bundle
@@ -32,14 +34,18 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.SecureRandom
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 class NewItemActivity : AppCompatActivity(), OnMapReadyCallback{
 
@@ -48,12 +54,14 @@ class NewItemActivity : AppCompatActivity(), OnMapReadyCallback{
     private var selectedMarker: Marker? = null
 
     private lateinit var imageUri: Uri
+    private var imageFile: File? = null
 
     private val cameraLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ){
         if(it.resultCode == RESULT_OK){
-            binding.imageUrl.setText("Imagem obtida")
+            //binding.imageUrl.setText("Imagem obtida")
+            saveItem()
         }
         else{
 
@@ -145,9 +153,11 @@ class NewItemActivity : AppCompatActivity(), OnMapReadyCallback{
         val imageFileName = "JPEG_" + timeStamp + "_"
 
         val storageDir: File? = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
-        val imageFile = File.createTempFile(imageFileName, ".jpg", storageDir)
+        imageFile = File.createTempFile(imageFileName, ".jpg", storageDir)
 
-        return FileProvider.getUriForFile(this, "com.example.meuprimeiroapp.fileprovider", imageFile)
+        return FileProvider.getUriForFile(this, "com.example.meuprimeiroapp.fileprovider",
+            imageFile!!
+        )
     }
 
     @SuppressLint("MissingPermission")
@@ -195,6 +205,10 @@ class NewItemActivity : AppCompatActivity(), OnMapReadyCallback{
         if(!validateForm()){
             return
         }
+        uploadImageToFirebase()
+    }
+
+    private fun saveData() {
         val itemPosition = selectedMarker?.position?.let {
             ItemLocation(
                 name = binding.name.text.toString(),
@@ -216,13 +230,53 @@ class NewItemActivity : AppCompatActivity(), OnMapReadyCallback{
             )
 
             val result = safeApiCall { RetrofitClient.apiService.addItem(itemValue) }
-            withContext(Dispatchers.Main){
-                when(result){
+            withContext(Dispatchers.Main) {
+                when (result) {
                     is Result.Success -> handleOnSuccess()
                     is Result.Error -> handleOnError()
                 }
             }
         }
+    }
+
+    private fun uploadImageToFirebase(){
+
+        imageFile?.let {
+            //inicializa firebase storage
+            val storageRef = FirebaseStorage.getInstance().reference
+
+            //cria referencia imagem
+            val imageRef = storageRef.child("images/${UUID.randomUUID()}.jpg")
+
+            //converter o bitmap para byteArray
+            val baos = ByteArrayOutputStream()
+            val imageBitmap = BitmapFactory.decodeFile(it.path)
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+
+            val data = baos.toByteArray()
+
+            onLoadingImage(true)
+
+            imageRef.putBytes(data)
+                .addOnFailureListener {
+                    onLoadingImage(false)
+                    Toast.makeText(this, "Falha ao fazer upload da imagem", Toast.LENGTH_SHORT).show()
+                }
+                .addOnSuccessListener {
+                    onLoadingImage(false)
+                    imageRef.downloadUrl.addOnSuccessListener { uri ->
+                        binding.imageUrl.setText(uri.toString())
+                        saveData()
+                    }
+                    Toast.makeText(this, "Sucesso ao fazer upload da imagem", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun onLoadingImage(isLoading: Boolean) {
+        binding.loadImageProgress.visibility = if(isLoading) View.VISIBLE else View.GONE
+        binding.takePictureCta.isEnabled = !isLoading
+        binding.saveCta.isEnabled = !isLoading
     }
 
     private fun handleOnError() {
